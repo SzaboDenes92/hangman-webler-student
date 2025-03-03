@@ -5,30 +5,61 @@ import java.util.Scanner;
 
 public class Hangman {
 
-    private static int  wrongTry = 158;
+    private static int  wrongTry = 15;
 
     public static   void main (String[] args) {
-        Scanner scanner = new Scanner( System.in );
+        Scanner scanner=new Scanner (System.in);
+        boolean playAgain ;
+        do {
+            wrongTry = 2;
+            playAgain = playGame (scanner);
+        } while (playAgain);
+
+    }
+
+
+    private static boolean playGame(Scanner scanner ){
         String word =generateRandomWord(getWords());
-        String res = hidedWord(word);
+        String res = hidedWord (word);
         System.out.println(res);
-        int counter = 15;
-        String userGuess = getUserInput(scanner, "Kérek egy betűt:");;
-        String whatThe = changeAGuess(word, res, userGuess);
-        System.out.println( whatThe );
+        StringBuilder updatedWord = new StringBuilder(res);
+
+        while(wrongTry > 0) {
+            String userGuess = getUserInput(scanner, "Kérek egy betűt:");
+            String whatThe = changeAGuess(word, updatedWord, userGuess);
+            System.out.println(whatThe);
+            if (!updatedWord.toString().contains("_")) {
+                System.out.println("Nyertél!");
+                break;
+            }
+        }
+            if (wrongTry == 0) {
+                System.out.println("Vesztettél!");
+
+        }
+        return askPlayAgain(scanner);
     }
 
-    private static String[] getWords() {return new String[]{"Budapest", "Amsterdam", "Berlin"};
+
+
+    private static boolean askPlayAgain(Scanner scanner) {
+        System.out.println("Szeretnél még játszani? (i - igen, minden más nem");
+        String response = scanner.next().toLowerCase();
+        return response.equals("i");
     }
 
-    private static String generateRandomWord(String[] words) {
+    private static String[] getWords() {
+        return new String[] {"Budapest", "Amszterdam", "Berlin"};
+    }
+
+    private static String  generateRandomWord(String[] words) {
         Random random = new Random();
         int index = random.nextInt(words.length);
         return words[index];
         //return words [new Random().nextInt(words.length)];
     }
 
-    public static String hidedWord(String word, int length) {
+    public static String[] hidedWord(String word, int length) {
         int lenght = word.length();
         char[] charsOfWord = new char[length];
         for (int i = 0; i < length; i++) {
@@ -36,11 +67,11 @@ public class Hangman {
             charsOfWord[i] = letter;
         }
 
-        StringBuilder hideWord = new StringBuilder();
+        StringBuilder hidedWord = new StringBuilder();
         for (char c : charsOfWord) {
-            hideWord.append(c).append(" ");
+            hidedWord.append(c).append(" ");
         }
-        return hideWord.toString();
+        return new String[]{hidedWord.toString ()};
     }
 
     private static String getUserInput( Scanner scanner, String text ) {
@@ -49,26 +80,22 @@ public class Hangman {
     }
 
     private static boolean checkIfValidGuess( String word, String letter) {
-        return word.toLowerCase().contains(letter.toLowerCase());
+        boolean isValidGuess=word.toLowerCase ().contains (letter.toLowerCase ());
+        if (!isValidGuess) {
+            wrongTry++;
+            System.out.println("Probálkozások száma: " + wrongTry);
+        }
+        return isValidGuess;
     }
-
-    private static String changeAGuess(String word, String hidedWord, String letter, String userGuess) {
-        if (checkIfValidGuess(word, userGuess)) {
-            StringBuilder updatedWord = new StringBuilder(hidedWord);
-            for (int i = 0; i < word.length(); i++) {
-                if(word.toLowerCase().charAt(i) == userGuess.toLowerCase().charAt(0)) {
-                    // akkor ki kell cserélni
-                    // akkor a hided word-ben az alsóvonást a megtalált betű vagy betűkre!
-                    updatedWord.setCharAt(i, letter.charAt(i));
+    private static String changeAGuess(String word, StringBuilder updatedWord,  String userGuess) {
+        if (checkIfValidGuess (word, userGuess)) {
+            for (int i=0; i < word.length (); i++) {
+                if (word.toLowerCase ().charAt (i) == userGuess.toLowerCase ().charAt (0)) {
+                        int index = i * 2;
+                        updatedWord.setCharAt (i, word.charAt (i));
                 }
             }
-            return updatedWord.toString();
         }
-        return hidedWord;
-    }
-
-    private static void  amig( int counter, String word, String letter) {
-
-
+        return updatedWord.toString ();
     }
 }
